@@ -1,56 +1,27 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import JobOfferPost from '../models/JobOfferPost.js';
-
+const express = require('express');
 const router = express.Router();
+const { protect, verifyJobOfferOwner } = require('../middleware/jobOfferMiddleware');
+const {
+  createJobOfferPost,
+  getAllJobOfferPosts,
+  getJobOfferPostById,
+  updateJobOfferPost,
+  deleteJobOfferPost
+} = require('../controllers/jobOfferController');
 
-// @route   GET /api/job-offers
-router.get('/', async (req, res) => {
-  try {
-    const offers = await JobOfferPost.find().populate('user', ['name', 'email']); // retrieve name and email
-    res.json(offers);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// Create a new job offer (Only authenticated users)
+router.post('/', protect, createJobOfferPost);
 
-// @route   POST /api/job-offers
-router.post('/', auth, checkRole('employer'), async (req, res) => {
-  const { title, description, salary, requiredExperience, location, contact } = req.body;
+// Get all job offers (Public)
+router.get('/', getAllJobOfferPosts);
 
-  try {
-    const newOffer = new JobOfferPost({
-      user: req.user.id,
-      title,
-      description,
-      salary,
-      requiredExperience,
-      location,
-      contact
-    });
+// Get a specific job offer by ID (Public)
+router.get('/:id', getJobOfferPostById);
 
-    const offer = await newOffer.save();
-    res.json(offer);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// Update a job offer (Only the owner)
+router.put('/:id', protect, verifyJobOfferOwner, updateJobOfferPost);
 
-// @route   GET /api/job-offers/:id -- for a particular user
-router.get('/:id', async (req, res) => {
-  try {
-    const offer = await JobOfferPost.findById(req.params.id)
-      .populate('user', ['name', 'email', 'profile']);
+// Delete a job offer (Only the owner)
+router.delete('/:id', protect, verifyJobOfferOwner, deleteJobOfferPost);
 
-    if (!offer) return res.status(404).json({ msg: 'Offer not found' });
-    
-    res.json(offer);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
-export default router;
+module.exports = router;

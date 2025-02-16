@@ -1,76 +1,28 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import ContactRequest from '../models/ContactRequest.js';
-import JobOfferPost from '../models/JobOfferPost.js';
-
+const express = require('express');
 const router = express.Router();
+const {
+  createContactRequest,
+  getAllContactRequests,
+  getContactRequestById,
+  updateContactRequestStatus,
+  deleteContactRequest
+} = require('../controllers/contactRequestController');
 
-// @route   POST /api/requests
-router.post('/', auth, checkRole('seeker'), async (req, res) => { // checkrole middleware se role compare kare rhe h
-  const { jobOfferId, message } = req.body;
+const { protect, isJobPoster, isJobSeeker } = require('../middleware/contactRequestMiddleware');
 
-  try {
-    const jobOffer = await JobOfferPost.findById(jobOfferId); // check if job exists
-    if (!jobOffer) return res.status(404).json({ msg: 'Job offer not found' });
+// Create a new contact request (Job Seeker requests contact)
+router.post('/', protect, createContactRequest);
 
-    const newRequest = new ContactRequest({ // a job seeker requests for a job
-      jobOffer: jobOfferId,
-      seeker: req.user.id,
-      message
-    });
+// Get all contact requests (Only authenticated users)
+router.get('/', protect, getAllContactRequests);
 
-    await newRequest.save();
-    res.json(newRequest);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// Get a single contact request by ID
+router.get('/:id', protect, getContactRequestById);
 
-// @route   PUT /api/requests/:id/approve
-router.put('/:id/approve', auth, async (req, res) => { // update karenge jab approval hoga
-  try {
-    const request = await ContactRequest.findById(req.params.id)
-      .populate('jobOffer');
-    
-    if (!request) return res.status(404).json({ msg: 'Request not found' });
-    
-    // Check if current user is the job offer owner
-    if (request.jobOffer.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: 'User not authorized' });
-    }
+// Update contact request status (Only Job Poster can approve/reject)
+router.put('/:id', protect, isJobPoster, updateContactRequestStatus);
 
-    request.status = 'approved';
-    await request.save();
-    
-    res.json(request);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// Delete contact request (Only the Job Seeker who created it can delete)
+router.delete('/:id', protect, isJobSeeker, deleteContactRequest);
 
-// @route   PUT /api/requests/:id/reject
-router.put('/:id/reject', auth, async (req, res) => { // for rejection
-    try {
-      const request = await ContactRequest.findById(req.params.id)
-        .populate('jobOffer');
-      
-      if (!request) return res.status(404).json({ msg: 'Request not found' });
-      
-      // Check if current user is the job offer owner
-      if (request.jobOffer.user.toString() !== req.user.id) {
-        return res.status(401).json({ msg: 'User not authorized' });
-      }
-  
-      request.status = 'rejected';
-      await request.save();
-      
-      res.json(request);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-    }
-  });
-
-export default router;
+module.exports = router;

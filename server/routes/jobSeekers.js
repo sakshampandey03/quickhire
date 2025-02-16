@@ -1,40 +1,21 @@
-import express from 'express';
-import auth from '../middleware/auth.js';
-import JobSeekerPost from '../models/JobSeekerPost.js';
-
+const express = require('express');
 const router = express.Router();
+const jobSeekerController = require('../controllers/jobSeekerController');
+const { protect, isJobSeeker } = require('../middleware/jobSeekerMiddleware');
 
-// @route   POST /api/job-seekers
-router.post('/', auth, checkRole('seeker'), async (req, res) => {
-  const { title, description, expectedSalary, experienceYears, desiredLocation } = req.body;
+// 📌 Create a new job seeker post (Only authenticated job seekers)
+router.post('/', protect, isJobSeeker, jobSeekerController.createJobSeekerPost);
 
-  try {
-    const newPost = new JobSeekerPost({
-      user: req.user.id,
-      title,
-      description,
-      expectedSalary,
-      experienceYears,
-      desiredLocation
-    });
+// 📌 Get all job seeker posts (Public)
+router.get('/', jobSeekerController.getAllJobSeekerPosts);
 
-    const post = await newPost.save();
-    res.json(post);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// 📌 Get a single job seeker post by ID (Public)
+router.get('/:id', jobSeekerController.getJobSeekerPostById);
 
-// @route   GET /api/job-seekers
-router.get('/', async (req, res) => {
-  try {
-    const posts = await JobSeekerPost.find().populate('user', ['name', 'email', 'profile']);
-    res.json(posts);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
+// 📌 Update a job seeker post (Only the job seeker)
+router.put('/:id', protect, isJobSeeker, jobSeekerController.updateJobSeekerPost);
 
-export default router;
+// 📌 Delete a job seeker post (Only the job seeker)
+router.delete('/:id', protect, isJobSeeker, jobSeekerController.deleteJobSeekerPost);
+
+module.exports = router;
