@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/auth');
-const contactInfoRoutes = require('./routes/contactinfo');
 const cookieParser = require('cookie-parser');
-// const userRoutes = require('./routes/user');
+const dotenv = require('dotenv');
+const morgan = require('morgan'); // Logs HTTP requests
+const authRoutes = require('./routes/auth');
+const jobSeekerRoutes = require('./routes/jobSeekers'); // Add job seeker routes
+const jobOfferRoutes = require('./routes/jobOffers'); // Add job offer routes
+const contactRequestRoutes = require('./routes/contactRequests'); // Add contact request routes
 const { connect } = require('./config/database');
 
 // Load environment variables
@@ -14,23 +16,29 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));  // Parses URL-encoded data
 app.use(cookieParser());
-
+app.use(cors());
+//app.use(express.json());
+app.use(morgan('dev')); // Logs requests for debugging
 
 // Connect to MongoDB
 connect();
+
 // Routes
-app.use('/api/auth/', authRoutes);
-app.use('/api/contact-info/', contactInfoRoutes);
-// app.use('/api/user/', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/jobSeekers', jobSeekerRoutes);
+app.use('/api/jobOffers', jobOfferRoutes);
+app.use('/api/contactRequests', contactRequestRoutes);
+
+// Test Route
 app.get('/', (req, res) => {
-  res.send(`<h1>Hello World!</h1>`);
+  res.send(`<h1>Welcome to the Job Portal API</h1>`);
 });
+
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
