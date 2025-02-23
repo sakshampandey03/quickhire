@@ -7,9 +7,10 @@ exports.auth = async (req, res, next) =>{
         if(!token){
             return res.status(403).json({
                 success: false,
-                message: "Unauthorized"
+                message: "Unauthorized cant find cookie in auth middleware"
             })
         }
+        
         try {
             const decoded = await jwt.verify(token, process.env.JWT_SECRET);
             req.user = await User.findById(decoded.id);
@@ -26,7 +27,7 @@ exports.auth = async (req, res, next) =>{
         console.log(err);
         return res.status(403).json({
             success: false,
-            message: "Unauthorized"
+            message: "Unauthorized cant pass middleware"
         })
     }
 }

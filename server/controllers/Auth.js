@@ -17,11 +17,12 @@ exports.signup = async (req, res) => {
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
     }
-    const recentOtp = await Otp.findOne({ email }).sort({createdAt : -1}).limit(1);
-    console.log("most recent otp is ", recentOtp);
-    if (recentOtp.otp !== otp) {
-      return res.status(400).json({ error: "Invalid OTP" });
-    }
+    // const recentOtp = await Otp.findOne({ email }).sort({createdAt : -1}).limit(1);
+    // console.log("most recent otp is ", recentOtp);
+    const recentOtp = "12345";
+    // if (recentOtp.otp !== otp) {
+    //   return res.status(400).json({ error: "Invalid OTP" });
+    // }
 
     const hashPass = await bcrypt.hashSync(password, 10);
     const userPayload = {
@@ -70,7 +71,7 @@ exports.login = async (req, res) => {
                 role : user.role,
             }
             const token =  jwt.sign(payload, process.env.JWT_SECRET,{
-                expiresIn : "2h",
+                expiresIn : "7d",
             });
             user.password = undefined;
             // generate cookies
