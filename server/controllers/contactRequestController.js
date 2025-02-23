@@ -1,6 +1,6 @@
-const ContactRequest = require('../models/contactRequestModel');
-const JobOfferPost = require('../models/jobOfferPostModel');
-const User = require('../models/userModel');
+const ContactRequest = require('../models/ContactRequest');
+const JobOfferPost = require('../models/JobOfferPost');
+const User = require('../models/User');
 
 // Create a new contact request
 exports.createContactRequest = async (req, res) => {
@@ -35,7 +35,7 @@ exports.createContactRequest = async (req, res) => {
 };
 
 //  Get all contact requests for a specific job offer
-exports.getContactRequestsByJobOffer = async (req, res) => {
+exports.getAllContactRequests = async (req, res) => {
   try {
     const { jobOfferId } = req.params;
     const requests = await ContactRequest.find({ jobOffer: jobOfferId }).populate('seeker', 'name email');
@@ -46,7 +46,7 @@ exports.getContactRequestsByJobOffer = async (req, res) => {
 };
 
 //  Get contact requests made by a specific job seeker
-exports.getContactRequestsBySeeker = async (req, res) => {
+exports.getContactRequestById = async (req, res) => {
   try {
     const seekerId = req.user.id;
     const requests = await ContactRequest.find({ seeker: seekerId }).populate('jobOffer', 'title location');

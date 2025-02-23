@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-const ContactRequest = require('../models/contactRequestModel');
-const JobOfferPost = require('../models/jobOfferPostModel');
+const User = require('../models/User');
+const ContactRequest = require('../models/ContactRequest');
+const JobOfferPost = require('../models/JobOfferPost');
 
 //  Middleware to verify JWT token from cookies
 exports.protect = async (req, res, next) => {

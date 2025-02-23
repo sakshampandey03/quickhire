@@ -8,21 +8,21 @@ const {
   deleteContactRequest
 } = require('../controllers/contactRequestController');
 
-const { protect, isJobPoster, isJobSeeker } = require('../middleware/contactRequestMiddleware');
+const { protect, isJobPoster, isJobSeeker } = require('../middlewares/contactRequestMiddleware');
 
 // Create a new contact request (Job Seeker requests contact)
-router.post('/', protect, createContactRequest);
+router.post('/contact-requests', protect, createContactRequest);
 
 // Get all contact requests (Only authenticated users)
-router.get('/', protect, getAllContactRequests);
+router.get('/contact-requests', protect, getAllContactRequests);
 
 // Get a single contact request by ID
-router.get('/:id', protect, getContactRequestById);
+router.get('/contact-requests/:id', protect, getContactRequestById);
 
 // Update contact request status (Only Job Poster can approve/reject)
-router.put('/:id', protect, isJobPoster, updateContactRequestStatus);
+router.put('/contact-requests/:id/status', protect, isJobPoster, updateContactRequestStatus);
 
 // Delete contact request (Only the Job Seeker who created it can delete)
-router.delete('/:id', protect, isJobSeeker, deleteContactRequest);
+router.delete('/contact-requests/:id', protect, isJobSeeker, deleteContactRequest);
 
 module.exports = router;

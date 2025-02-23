@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, verifyJobOfferOwner } = require('../middleware/jobOfferMiddleware');
+const { protect, verifyJobOfferOwner } = require('../middlewares/jobOfferMiddleware');
 const {
   createJobOfferPost,
   getAllJobOfferPosts,
@@ -10,18 +10,18 @@ const {
 } = require('../controllers/jobOfferController');
 
 // Create a new job offer (Only authenticated users)
-router.post('/', protect, createJobOfferPost);
+router.post('/job-offers', protect, createJobOfferPost);
 
 // Get all job offers (Public)
-router.get('/', getAllJobOfferPosts);
+router.get('/job-offers', getAllJobOfferPosts);
 
 // Get a specific job offer by ID (Public)
-router.get('/:id', getJobOfferPostById);
+router.get('/job-offers/:id', getJobOfferPostById);
 
 // Update a job offer (Only the owner)
-router.put('/:id', protect, verifyJobOfferOwner, updateJobOfferPost);
+router.put('/job-offers/:id', protect, verifyJobOfferOwner, updateJobOfferPost);
 
 // Delete a job offer (Only the owner)
-router.delete('/:id', protect, verifyJobOfferOwner, deleteJobOfferPost);
+router.delete('/job-offers/:id', protect, verifyJobOfferOwner, deleteJobOfferPost);
 
 module.exports = router;
